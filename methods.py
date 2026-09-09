@@ -24,7 +24,20 @@ def gradient_descent(
         max_iter: int = MAX_ITER,
         eps: float = TOLERANCE
         ) -> Tuple[list, list]:
+    '''Performs gradient descent optimization on a symbolic function.
 
+    Args:
+        x_symbols (Tuple[Symbol]): Symbols representing the variables of the function.
+        f_symbolic (Add): Symbolic representation of the function to be minimized.
+        x0 (np.ndarray): Initial values for each symbol.
+        bounds (Iterable): Bounds for each variable as (min, max) tuples.
+        step_size (float): Step size for the gradient descent updates.
+        max_iter (int, optional): Maximum number of iterations. Defaults to MAX_ITER.
+        eps (float, optional): Convergence tolerance. Defaults to TOLERANCE.
+
+    Returns:
+        Tuple[list, list]: History of variable values and corresponding function values.
+    '''
     assert len(x_symbols) == len(x0)
 
     # automatic differentation
