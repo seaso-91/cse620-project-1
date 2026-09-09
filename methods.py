@@ -29,7 +29,7 @@ def gradient_descent(
     Args:
         x_symbols (Tuple[Symbol]): Symbols representing the variables of the function.
         f_symbolic (Add): Symbolic representation of the function to be minimized.
-        x0 (np.ndarray): Initial values for each symbol.
+        x0 (np.ndarray[float]): Initial values for each symbol, given as a numpy array of floats (must have decimals).
         bounds (Iterable): Bounds for each variable as (min, max) tuples.
         step_size (float): Step size for the gradient descent updates.
         max_iter (int, optional): Maximum number of iterations. Defaults to MAX_ITER.
