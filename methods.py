@@ -16,8 +16,8 @@ def gradient_descent(
         x0: float, 
         bounds: Iterable, 
         step_size: float,
-        max_iter: int,
-        eps: float
+        max_iter: int = MAX_ITER,
+        eps: float = TOLERANCE
         ) -> Tuple[np.ndarray, np.ndarray]:
     
     x_history = [x0]
