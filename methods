@@ -1,0 +1,14 @@
+# Optimization methods implemented in this module
+
+
+def newtons_method():
+    ...
+
+def gradient_descent():
+    ...
+
+def adagrad():
+    ...
+
+def adam():
+    ...
