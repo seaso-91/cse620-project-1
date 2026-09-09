@@ -3,6 +3,10 @@ import numpy as np
 
 # Optimization methods implemented in this module
 
+TOLERANCE = 1e-6
+MAX_ITER = 2000
+
+
 def newtons_method() -> Tuple[np.ndarray, np.ndarray]:
     ...
 
