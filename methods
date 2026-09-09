@@ -1,14 +1,16 @@
+from typing import Tuple, Iterable
+import numpy as np
+
 # Optimization methods implemented in this module
 
-
-def newtons_method():
+def newtons_method() -> Tuple[np.ndarray, np.ndarray]:
     ...
 
-def gradient_descent():
+def gradient_descent() -> Tuple[np.ndarray, np.ndarray]:
     ...
 
-def adagrad():
+def adagrad() -> Tuple[np.ndarray, np.ndarray]:
     ...
 
-def adam():
+def adam() -> Tuple[np.ndarray, np.ndarray]:
     ...
