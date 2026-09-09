@@ -18,12 +18,12 @@ def newtons_method() -> Tuple[np.ndarray, np.ndarray]:
 def gradient_descent(
         x_symbols: Tuple[Symbol],  # need to pass these for automatic differentation
         f_symbolic: Add,  # sympy functions seem to be defined as an operation "tree", and most polynomials will have "Add" as the topmost op. TODO: make this better 
-        x0: Tuple[float],  # initial values for each symbol
+        x0: np.ndarray,  # initial values for each symbol
         bounds: Iterable, 
         step_size: float,
         max_iter: int = MAX_ITER,
         eps: float = TOLERANCE
-        ) -> Tuple[np.ndarray, np.ndarray]:
+        ) -> Tuple[list, list]:
 
     assert len(x_symbols) == len(x0)
 
