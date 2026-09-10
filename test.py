@@ -14,5 +14,7 @@ results = gradient_descent((x1, x2),
                            ((-10, 10), (-10, 10)),
                            0.1)
 
-print(results)
-print(f'Final values: {results[0][-1]}, found minimum: {results[1][-1]}')
+# print(results)
+# print(f'Final values: {results[0][-1]}, found minimum: {results[1][-1]}')
+from utilities import plot_contours_with_path
+plot_contours_with_path((x1, x2), func, results, title="Gradient Descent Optimization Path")
