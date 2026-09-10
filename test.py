@@ -14,6 +14,7 @@ results = gradient_descent((x1, x2),
                            ((-10, 10), (-10, 10)),
                            0.1)
 
+<<<<<<< HEAD
 print(results)
 print(f'Final values: {results[0][-1]}, found minimum: {results[1][-1]}')
 
