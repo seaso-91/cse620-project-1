@@ -29,7 +29,7 @@ def gradient_descent(
     Args:
         x_symbols (Tuple[Symbol]): Symbols representing the variables of the function.
         f_symbolic (Add): Symbolic representation of the function to be minimized.
-        x0 (np.ndarray[float]): Initial values for each symbol, given as a numpy array of floats (must have decimals).
+        x0 (np.ndarray[float]): Initial values for each symbol, given as a numpy array of floats.
         bounds (Iterable): Bounds for each variable as (min, max) tuples.
         step_size (float): Step size for the gradient descent updates.
         max_iter (int, optional): Maximum number of iterations. Defaults to MAX_ITER.
@@ -39,6 +39,7 @@ def gradient_descent(
         Tuple[list, list]: History of variable values and corresponding function values.
     '''
     assert len(x_symbols) == len(x0)
+    x0 = x0.astype(float)
 
     # automatic differentation
     grad_f_symbolic = [f_symbolic.diff(var) for var in x_symbols]  # first-order gradient vector
@@ -83,7 +84,7 @@ def adam(x_symbols: Tuple[Symbol],  # need to pass these for automatic different
     Args:
         x_symbols (Tuple[Symbol]): Symbols representing the variables of the function.
         f_symbolic (Add): Symbolic representation of the function to be minimized.
-        x0 (np.ndarray[float]): Initial values for each symbol, given as a numpy array of floats (must have decimals).
+        x0 (np.ndarray[float]): Initial values for each symbol, given as a numpy array of floats.
         bounds (Iterable): Bounds for each variable as (min, max) tuples.
         step_size (float): Step size for the gradient descent updates.
         beta1 (float): Exponential decay rate for the first moment estimates.
@@ -94,7 +95,11 @@ def adam(x_symbols: Tuple[Symbol],  # need to pass these for automatic different
     Returns:
         Tuple[list, list]: History of variable values and corresponding function values.
     '''
-    assert len(x_symbols) == len(x0)
+    assert len(x_symbols) == len(x0), "Number of symbols must match the number of initial values"
+    assert beta1 > 0 and beta1 < 1, "beta1 must be between 0 and 1"
+    assert beta2 > 0 and beta2 < 1, "beta2 must be between 0 and 1"
+
+    x0 = x0.astype(float)
 
     # automatic differentation
     grad_f_symbolic = [f_symbolic.diff(var) for var in x_symbols]  # first-order gradient vector
@@ -103,27 +108,29 @@ def adam(x_symbols: Tuple[Symbol],  # need to pass these for automatic different
     
     x_history = [x0]
     y_history = [f_lambda(*x0)]
-    m_history = [np.zeros_like(x0)]  # initialize first moment vector for Adam optimizer
-    v_history = [np.zeros_like(x0)]  # initialize second moment vector for Adam optimizer
+    m_t = np.zeros_like(x0, dtype=float)
+    v_t = np.zeros_like(x0, dtype=float)
 
     for i in range(max_iter):
         x_t = np.zeros_like(x0)
-        m_t = np.zeros_like(x0)
-        v_t = np.zeros_like(x0)
+        m_hat = np.zeros_like(x0)
+        v_hat = np.zeros_like(x0)
         for j in range(len(x0)):
-            m_t[j] = beta1 * m_history[i][j] + (1 - beta1) * grad_f_lambda[j](*x_history[i])
-            v_t[j] = beta2 * v_history[i][j] + (1 - beta2) * (grad_f_lambda[j](*x_history[i]) ** 2)
-            m_t[j] = m_t[j] / (1 - beta1 ** (i + 1))
-            v_t[j] = v_t[j] / (1 - beta2 ** (i + 1))
-            x_t[j] = x_history[i][j] - step_size * m_t[j] / (np.sqrt(v_t[j]) + eps)
+            gradient = grad_f_lambda[j](*x_history[i])
+            m_t[j] = beta1 * m_t[j] + (1 - beta1) * gradient
+            v_t[j] = beta2 * v_t[j] + (1 - beta2) * gradient ** 2
+
+            m_hat[j] = m_t[j] / (1 - beta1 ** (i + 1))
+            v_hat[j] = v_t[j] / (1 - beta2 ** (i + 1))
+
+            x_t[j] = x_history[i][j] - step_size * m_hat[j] / (np.sqrt(v_hat[j]) + eps)
             x_t[j] = min(max(bounds[j][0], x_t[j]), bounds[j][1])
 
         y_t = f_lambda(*x_t)
 
         x_history.append(x_t)
         y_history.append(y_t)
-        m_history.append(m_t)
-        v_history.append(v_t)
+
 
         if np.abs(x_t - x_history[i]).sum() < eps:  # eps is always provided
             break
