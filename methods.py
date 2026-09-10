@@ -9,10 +9,59 @@ from sympy.core.add import Add
 
 TOLERANCE = 1e-6
 MAX_ITER = 2000
+REGULARIZATION = 1e-8  # added to the Hessian diagonal so it is always invertible
 
 
-def newtons_method() -> Tuple[np.ndarray, np.ndarray]:
-    ...
+def newtons_method(
+        x_symbols: Tuple[Symbol],  # need to pass these for automatic differentation
+        f_symbolic: Add,  # symbolic function to be minimized
+        x0: np.ndarray,  # initial values for each symbol
+        bounds: Iterable,
+        step_size: float,  # damping factor (alpha): the full Newton step is scaled by this
+        max_iter: int = MAX_ITER,
+        eps: float = TOLERANCE
+        ) -> Tuple[list, list]:
+   
+    assert len(x_symbols) == len(x0)
+
+    n = len(x_symbols)
+
+    # automatic differentation: first-order gradient vector and second-order Hessian matrix
+    grad_f_symbolic = [f_symbolic.diff(var) for var in x_symbols]
+    hess_f_symbolic = [[f_symbolic.diff(vi).diff(vj) for vj in x_symbols] for vi in x_symbols]
+
+    f_lambda = lambdify(x_symbols, f_symbolic, "numpy")
+    grad_f_lambda = [lambdify(x_symbols, g, "numpy") for g in grad_f_symbolic]
+    hess_f_lambda = [[lambdify(x_symbols, h, "numpy") for h in row] for row in hess_f_symbolic]
+
+    x_history = [x0]
+    y_history = [f_lambda(*x0)]
+
+    identity = np.eye(n)
+
+    for i in range(max_iter):
+        x_prev = x_history[i]
+
+        # evaluate the gradient vector and Hessian matrix at the current point
+        grad_val = np.array([g(*x_prev) for g in grad_f_lambda], dtype=float)
+        hess_val = np.array([[h(*x_prev) for h in row] for row in hess_f_lambda], dtype=float)
+
+        # Newton direction: solve H*d = grad (equivalent to H^{-1}*grad, but numerically safer)
+        newton_step = np.linalg.solve(hess_val + REGULARIZATION * identity, grad_val)
+
+        x_t = np.zeros_like(x0)
+        for j in range(len(x0)):
+            x_t[j] = x_prev[j] - (step_size * newton_step[j])
+            x_t[j] = min(max(bounds[j][0], x_t[j]), bounds[j][1])
+        y_t = f_lambda(*x_t)
+
+        x_history.append(x_t)
+        y_history.append(y_t)
+
+        if np.abs(x_t - x_history[i]).sum() < eps:  # same convergence test as gradient_descent
+            break
+
+    return x_history, y_history
 
 
 def gradient_descent(
