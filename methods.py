@@ -17,12 +17,29 @@ def newtons_method(
         f_symbolic: Add,  # symbolic function to be minimized
         x0: np.ndarray,  # initial values for each symbol
         bounds: Iterable,
-        step_size: float,  # damping factor (alpha): the full Newton step is scaled by this
+        step_size: float = 1,  # damping factor (alpha): the full Newton step is scaled by this
         max_iter: int = MAX_ITER,
         eps: float = TOLERANCE
         ) -> Tuple[list, list]:
-   
+    '''Performs Newton's Method optimization on a symbolic function.
+
+    Args:
+        x_symbols (Tuple[Symbol]): Symbols representing the variables of the function.
+        f_symbolic (Add): Symbolic representation of the function to be minimized.
+        x0 (np.ndarray[float]): Initial values for each symbol, given as a numpy array of floats.
+        bounds (Iterable): Bounds for each variable as (min, max) tuples.
+        step_size (float): Step size for the Newton updates (used for damping).
+        max_iter (int, optional): Maximum number of iterations. Defaults to MAX_ITER.
+        eps (float, optional): Convergence tolerance. Defaults to TOLERANCE.
+
+    Returns:
+        Tuple[list, list]: History of variable values and corresponding function values.
+    '''
     assert len(x_symbols) == len(x0)
+    assert step_size > 0, "Step size must be positive"
+    assert step_size <= 1, "Step size must not exceed 1"
+
+    x0 = x0.astype(float)
 
     n = len(x_symbols)
 
