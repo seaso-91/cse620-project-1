@@ -53,3 +53,28 @@ def plot_contours_with_path(
     plt.xlabel('x'); plt.ylabel('y')
     plt.show()
 
+def test_optimizer(optimizer_name: str, step_size: list[float], starting_point: list, **kwargs):
+    final_value =[]
+    number_of_iterations = []
+    starting_points = []
+
+    match optimizer_name:
+        case "adam":
+            from methods import adam as optimizer
+        case "gradient_descent":
+            from methods import gradient_descent as optimizer
+        case "adagrad":
+            from methods import adagrad as optimizer
+        case "newtons_method":
+            from methods import newtons_method as optimizer
+        case _:
+            raise ValueError(f"Unsupported optimizer: {optimizer_name}")
+
+    for s in step_size:
+        x_history, y_history = optimizer(x0=starting_point, step_size=s, **kwargs)
+        starting_points.append(starting_point)
+        final_value.append(y_history[-1])
+        number_of_iterations.append(len(x_history) - 1)  # -1 since x_history includes x0
+
+    return step_size, starting_points, final_value, number_of_iterations
+        
