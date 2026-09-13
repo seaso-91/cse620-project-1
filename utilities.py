@@ -58,11 +58,17 @@ def plot_contours_with_path(
         for j in range(X.shape[1]):
             Z[i, j] = f_lambda(X[i, j], Y[i, j])
     plt.figure()
-    cs = plt.contour(X, Y, Z, levels=levels)
+
+    import matplotlib.colors as mcolors
+    gray_cmap = mcolors.LinearSegmentedColormap.from_list(
+        "gray_no_white", ["lightgray", "black"]
+    )
+
+    cs = plt.contour(X, Y, Z, levels=levels, cmap=gray_cmap, linewidths=0.5)
     plt.clabel(cs, inline=1, fontsize=8)
 
     for i, path in enumerate(P):
-        plt.plot(path[:,0], path[:,1], label=result_labels[i], marker='.', markersize=1, linewidth=0.25, color=colors[i % len(colors)])
+        plt.plot(path[:,0], path[:,1], label=result_labels[i], marker='.', markersize=1, linewidth=1, color=colors[i % len(colors)])
     plt.title(title)
     plt.xlabel('x'); plt.ylabel('y')
 
