@@ -1,3 +1,4 @@
+from time import perf_counter
 from typing import Tuple, Iterable
 import numpy as np
 
@@ -56,6 +57,8 @@ def newtons_method(
 
     identity = np.eye(n)
 
+    did_converge = False
+    t_start = perf_counter()
     for i in range(max_iter):
         x_prev = x_history[i]
 
@@ -76,9 +79,11 @@ def newtons_method(
         y_history.append(y_t)
 
         if np.abs(x_t - x_history[i]).sum() < eps:  # same convergence test as gradient_descent
+            did_converge = True
             break
-
-    return x_history, y_history
+    
+    t_elapsed = perf_counter() - t_start
+    return x_history, y_history, t_elapsed, did_converge
 
 
 def gradient_descent(
@@ -115,6 +120,8 @@ def gradient_descent(
     x_history = [x0]
     y_history = [f_lambda(*x0)]
 
+    did_converge = False
+    t_start = perf_counter()
     for i in range(max_iter):
         x_t = np.zeros_like(x0)
         for j in range(len(x0)):
@@ -126,9 +133,11 @@ def gradient_descent(
         y_history.append(y_t)
 
         if np.abs(x_t - x_history[i]).sum() < eps:  # eps is always provided
+            did_converge = True
             break
 
-    return x_history, y_history
+    t_elapsed = perf_counter() - t_start
+    return x_history, y_history, t_elapsed, did_converge
 
 
 def adagrad(
@@ -167,6 +176,8 @@ def adagrad(
 
     grad_square_accum = np.zeros_like(x0)  # initial gradient accumulator matrix, empty
 
+    did_converge = False
+    t_start = perf_counter()
     for i in range(max_iter):
         # gradient accumulation step
         g = np.array([grad_f_lambda[j](*x_history[i]) for j in range(len(grad_f_lambda))])
@@ -185,9 +196,11 @@ def adagrad(
         y_history.append(y_t)
 
         if np.abs(x_t - x_history[i]).sum() < eps:  # eps is always provided
+            did_converge = True
             break
 
-    return x_history, y_history
+    t_elapsed = perf_counter() - t_start
+    return x_history, y_history, t_elapsed, did_converge
 
 
 def adam(x_symbols: Tuple[Symbol],  # need to pass these for automatic differentation
@@ -232,6 +245,8 @@ def adam(x_symbols: Tuple[Symbol],  # need to pass these for automatic different
     m_t = np.zeros_like(x0, dtype=float)
     v_t = np.zeros_like(x0, dtype=float)
 
+    did_converge = False
+    t_start = perf_counter()
     for i in range(max_iter):
         x_t = np.zeros_like(x0)
         m_hat = np.zeros_like(x0)
@@ -252,8 +267,9 @@ def adam(x_symbols: Tuple[Symbol],  # need to pass these for automatic different
         x_history.append(x_t)
         y_history.append(y_t)
 
-
-        if np.abs(x_t - x_history[i]).sum() < eps:  # eps is always provided
+        if np.abs(x_t - x_history[i]).sum() < eps:
+            did_converge = True
             break
 
-    return x_history, y_history
+    t_elapsed = perf_counter() - t_start
+    return x_history, y_history, t_elapsed, did_converge
