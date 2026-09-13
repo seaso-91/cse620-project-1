@@ -14,9 +14,10 @@ results = adagrad((x1, x2),
                            ((-10, 10), (-10, 10)),
                            0.1, max_iter=10000)
 
-<<<<<<< HEAD
-print(results)
+# print(results)
 print(f'Final values: {results[0][-1]}, found minimum: {results[1][-1]}')
+from utilities import plot_contours_with_path
+plot_contours_with_path((x1, x2), func, results, title="Gradient Descent Optimization Path")
 
 # --- Newton's Method tests (added for local verification) ---
 from methods import newtons_method
@@ -45,8 +46,3 @@ cx, cy = newtons_method((x1, x2),
                         ((-6, 6), (-6, 6)),
                         0.5)
 print(f"[Newton f3 bumps] final: {cx[-1]}, min: {cy[-1]:.4f}, iters: {len(cx)-1}  (converges to a stationary point)")
-=======
-# print(results)
-print(f'Final values: {results[0][-1]}, found minimum: {results[1][-1]}')
-from utilities import plot_contours_with_path
-plot_contours_with_path((x1, x2), func, results, title="Gradient Descent Optimization Path")
