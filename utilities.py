@@ -81,6 +81,8 @@ def test_optimizer(optimizer_name: str, step_size: list[float], starting_point: 
     final_value =[]
     number_of_iterations = []
     starting_points = []
+    time_elapsed_list = []
+    convergence_list = []
 
     match optimizer_name:
         case "adam":
@@ -95,9 +97,11 @@ def test_optimizer(optimizer_name: str, step_size: list[float], starting_point: 
             raise ValueError(f"Unsupported optimizer: {optimizer_name}")
 
     for s in step_size:
-        x_history, y_history = optimizer(x0=starting_point, step_size=s, **kwargs)
+        x_history, y_history, time_elapsed, convergence = optimizer(x0=starting_point, step_size=s, **kwargs)
         starting_points.append(starting_point)
         final_value.append(y_history[-1])
         number_of_iterations.append(len(x_history) - 1)  # -1 since x_history includes x0
+        time_elapsed_list.append(time_elapsed)
+        convergence_list.append(convergence)
 
-    return step_size, starting_points, final_value, number_of_iterations
+    return step_size, starting_points, final_value, number_of_iterations, time_elapsed_list, convergence_list
