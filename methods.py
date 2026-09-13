@@ -165,13 +165,14 @@ def adagrad(
     x_history = [x0]
     y_history = [f_lambda(*x0)]
 
-    grad_square_accum = np.zeros_like(np.outer(x0, x0))  # initial gradient accumulator matrix, empty
+    grad_square_accum = np.zeros_like(x0)  # initial gradient accumulator matrix, empty
 
     for i in range(max_iter):
         # gradient accumulation step
         g = np.array([grad_f_lambda[j](*x_history[i]) for j in range(len(grad_f_lambda))])
-        grad_square_accum += np.outer(g, g)  # accumulating outer product of the gradient vector of the most recent iteration point
-        adagrad_mult = np.diag(grad_square_accum + np.identity(len(x0)) * REGULARIZATION) ** -0.5
+        grad_square_accum += g**2  # accumulating outer product of the gradient vector of the most recent iteration point
+        # if g =[[a,0],[0,b]] then gg^t = [[a^2,0],[0,b^2]] which is the same as g**2 for the diagonal elements
+        adagrad_mult = 1.0 / (np.sqrt(grad_square_accum) + REGULARIZATION) # what about fast inverse square??
 
         # gradient descent step
         x_t = np.zeros_like(x0)
