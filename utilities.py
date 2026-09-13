@@ -95,7 +95,7 @@ def test_optimizer(optimizer_name: str, step_size: list[float], starting_point: 
             raise ValueError(f"Unsupported optimizer: {optimizer_name}")
 
     for s in step_size:
-        x_history, y_history = optimizer(x0=starting_point, step_size=s, **kwargs)
+        x_history, y_history, t_elapsed, did_converge = optimizer(x0=starting_point, step_size=s, **kwargs)
         starting_points.append(starting_point)
         final_value.append(y_history[-1])
         number_of_iterations.append(len(x_history) - 1)  # -1 since x_history includes x0
