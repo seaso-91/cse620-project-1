@@ -1,5 +1,4 @@
 from time import perf_counter
-from typing import Tuple, Iterable
 import numpy as np
 
 from sympy import lambdify
@@ -14,18 +13,18 @@ REGULARIZATION = 1e-8  # added to the Hessian diagonal so it is always invertibl
 
 
 def newtons_method(
-        x_symbols: Tuple[Symbol],  # need to pass these for automatic differentation
+        x_symbols: tuple[Symbol],  # need to pass these for automatic differentation
         f_symbolic: Add,  # symbolic function to be minimized
-        x0: np.ndarray,  # initial values for each symbol
-        bounds: Iterable,
+        x0: tuple[float],  # initial values for each symbol
+        bounds: tuple[tuple[float]],
         step_size: float = 1,  # damping factor (alpha): the full Newton step is scaled by this
         max_iter: int = MAX_ITER,
         eps: float = TOLERANCE
-        ) -> Tuple[list, list]:
+        ) -> tuple[list, list, float, bool]:
     '''Performs Newton's Method optimization on a symbolic function.
 
     Args:
-        x_symbols (Tuple[Symbol]): Symbols representing the variables of the function.
+        x_symbols (tuple[Symbol]): Symbols representing the variables of the function.
         f_symbolic (Add): Symbolic representation of the function to be minimized.
         x0 (np.ndarray[float]): Initial values for each symbol, given as a numpy array of floats.
         bounds (Iterable): Bounds for each variable as (min, max) tuples.
@@ -34,13 +33,13 @@ def newtons_method(
         eps (float, optional): Convergence tolerance. Defaults to TOLERANCE.
 
     Returns:
-        Tuple[list, list]: History of variable values and corresponding function values.
+        tuple[list, list, float, bool]: History of variable values and corresponding function values.
     '''
     assert len(x_symbols) == len(x0)
     assert step_size > 0, "Step size must be positive"
     assert step_size <= 1, "Step size must not exceed 1"
 
-    x0 = x0.astype(float)
+    x0 = np.array(x0).astype(float)
 
     n = len(x_symbols)
 
@@ -87,18 +86,18 @@ def newtons_method(
 
 
 def gradient_descent(
-        x_symbols: Tuple[Symbol],  # need to pass these for automatic differentation
+        x_symbols: tuple[Symbol],  # need to pass these for automatic differentation
         f_symbolic: Add,  # sympy functions seem to be defined as an operation "tree", and most polynomials will have "Add" as the topmost op. TODO: make this better 
-        x0: np.ndarray,  # initial values for each symbol
-        bounds: Iterable, 
+        x0: tuple[float],  # initial values for each symbol
+        bounds: tuple[tuple[float]], 
         step_size: float,
         max_iter: int = MAX_ITER,
         eps: float = TOLERANCE
-        ) -> Tuple[list, list]:
+        ) -> tuple[list, list, float, bool]:
     '''Performs gradient descent optimization on a symbolic function.
 
     Args:
-        x_symbols (Tuple[Symbol]): Symbols representing the variables of the function.
+        x_symbols (tuple[Symbol]): Symbols representing the variables of the function.
         f_symbolic (Add): Symbolic representation of the function to be minimized.
         x0 (np.ndarray[float]): Initial values for each symbol, given as a numpy array of floats.
         bounds (Iterable): Bounds for each variable as (min, max) tuples.
@@ -107,10 +106,10 @@ def gradient_descent(
         eps (float, optional): Convergence tolerance. Defaults to TOLERANCE.
 
     Returns:
-        Tuple[list, list]: History of variable values and corresponding function values.
+        tuple[list, list, float, bool]: History of variable values and corresponding function values.
     '''
     assert len(x_symbols) == len(x0)
-    x0 = x0.astype(float)
+    x0 = np.array(x0).astype(float)
 
     # automatic differentation
     grad_f_symbolic = [f_symbolic.diff(var) for var in x_symbols]  # first-order gradient vector
@@ -141,18 +140,18 @@ def gradient_descent(
 
 
 def adagrad(
-        x_symbols: Tuple[Symbol],  # need to pass these for automatic differentation
+        x_symbols: tuple[Symbol],  # need to pass these for automatic differentation
         f_symbolic: Add,  # sympy functions seem to be defined as an operation "tree", and most polynomials will have "Add" as the topmost op. TODO: make this better 
-        x0: np.ndarray,  # initial values for each symbol
-        bounds: Iterable, 
+        x0: tuple[float],  # initial values for each symbol
+        bounds: tuple[tuple[float]], 
         step_size: float,
         max_iter: int = MAX_ITER,
         eps: float = TOLERANCE
-        ) -> Tuple[list, list]:
+        ) -> tuple[list, list, float, bool]:
     '''Performs AdaGrad optimization on a symbolic function.
 
     Args:
-        x_symbols (Tuple[Symbol]): Symbols representing the variables of the function.
+        x_symbols (tuple[Symbol]): Symbols representing the variables of the function.
         f_symbolic (Add): Symbolic representation of the function to be minimized.
         x0 (np.ndarray[float]): Initial values for each symbol, given as a numpy array of floats.
         bounds (Iterable): Bounds for each variable as (min, max) tuples.
@@ -161,10 +160,10 @@ def adagrad(
         eps (float, optional): Convergence tolerance. Defaults to TOLERANCE.
 
     Returns:
-        Tuple[list, list]: History of variable values and corresponding function values.
+        tuple[list, list, float, bool]: History of variable values and corresponding function values.
     '''
     assert len(x_symbols) == len(x0)
-    x0 = x0.astype(float)
+    x0 = np.array(x0).astype(float)
 
     # automatic differentation
     grad_f_symbolic = [f_symbolic.diff(var) for var in x_symbols]  # first-order gradient vector
@@ -203,20 +202,20 @@ def adagrad(
     return x_history, y_history, t_elapsed, did_converge
 
 
-def adam(x_symbols: Tuple[Symbol],  # need to pass these for automatic differentation
+def adam(x_symbols: tuple[Symbol],  # need to pass these for automatic differentation
         f_symbolic: Add,  # sympy functions seem to be defined as an operation "tree", and most polynomials will have "Add" as the topmost op. TODO: make this better 
-        x0: np.ndarray,  # initial values for each symbol
-        bounds: Iterable, 
+        x0: tuple[float],  # initial values for each symbol
+        bounds: tuple[tuple[float]], 
         step_size: float,
         beta1: float,
         beta2: float,
         max_iter: int = MAX_ITER,
         eps: float = TOLERANCE
-        ) -> Tuple[list, list]:
+        ) -> tuple[list, list, float, bool]:
     '''Performs 'adam' optimization on a symbolic function.
 
     Args:
-        x_symbols (Tuple[Symbol]): Symbols representing the variables of the function.
+        x_symbols (tuple[Symbol]): Symbols representing the variables of the function.
         f_symbolic (Add): Symbolic representation of the function to be minimized.
         x0 (np.ndarray[float]): Initial values for each symbol, given as a numpy array of floats.
         bounds (Iterable): Bounds for each variable as (min, max) tuples.
@@ -227,13 +226,13 @@ def adam(x_symbols: Tuple[Symbol],  # need to pass these for automatic different
         eps (float, optional): Convergence tolerance. Defaults to TOLERANCE.
 
     Returns:
-        Tuple[list, list]: History of variable values and corresponding function values.
+        tuple[list, list, float, bool]: History of variable values and corresponding function values.
     '''
     assert len(x_symbols) == len(x0), "Number of symbols must match the number of initial values"
     assert beta1 > 0 and beta1 < 1, "beta1 must be between 0 and 1"
     assert beta2 > 0 and beta2 < 1, "beta2 must be between 0 and 1"
 
-    x0 = x0.astype(float)
+    x0 = np.array(x0).astype(float)
 
     # automatic differentation
     grad_f_symbolic = [f_symbolic.diff(var) for var in x_symbols]  # first-order gradient vector
