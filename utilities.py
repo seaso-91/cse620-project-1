@@ -11,12 +11,13 @@ def plot_contours_with_path(
     x_symbols: Tuple[Symbol],  # need to pass these for automatic differentation
     f_symbolic: Add,  # sympy functions seem to be defined as an operation "tree", and most polynomials will have "Add" as the topmost op. TODO: make this better 
     results:   Tuple[list, list] | list[Tuple[list, list]],
+    result_labels: list[str] | str = "path",
     xlim:   tuple[int, int] = None,
     ylim:   tuple[int, int] = None,
     levels: int = 40,
     title:  str = ""
     ):
-
+    
     # convert results to a list to allow any number of paths to be plotted
     if isinstance(results, Tuple):
         P = [np.array(results[0][:])]
@@ -27,14 +28,26 @@ def plot_contours_with_path(
     else:
         raise ValueError("Unsupported type for results")
 
-    min_x = min([p[:,0].min() for p in P])
-    max_x = max([p[:,0].max() for p in P])
-    min_y = min([p[:,1].min() for p in P])
-    max_y = max([p[:,1].max() for p in P])
+    if isinstance(result_labels, str):
+        result_labels = [result_labels]
+    elif isinstance(result_labels, list):
+        pass
+    else:
+        raise ValueError("Unsupported type for result_labels")
+
+    if len(result_labels) != len(P):
+        raise ValueError("The number of result labels must match the number of paths")
+
     if xlim is None:
-        xlim = (min_x-abs(min_x)*0.25, max_x+abs(max_x)*0.25)
+        min_x = min([p[:,0].min() for p in P])
+        max_x = max([p[:,0].max() for p in P])
+        range_x = max_x - min_x
+        xlim = (min_x-range_x*0.1, max_x+range_x*0.1)
     if ylim is None:
-        ylim = (min_y-abs(min_y)*0.25, max_y+abs(max_y)*0.25)
+        min_y = min([p[:,1].min() for p in P])
+        max_y = max([p[:,1].max() for p in P])
+        range_y = max_y - min_y
+        ylim = (min_y-range_y*0.1, max_y+range_y*0.1)
 
     f_lambda = lambdify(x_symbols, f_symbolic)
     xs = np.linspace(xlim[0], xlim[1], 400)
@@ -47,9 +60,38 @@ def plot_contours_with_path(
     plt.figure()
     cs = plt.contour(X, Y, Z, levels=levels)
     plt.clabel(cs, inline=1, fontsize=8)
+
     for i, path in enumerate(P):
-        plt.plot(path[:,0], path[:,1], marker='o', linewidth=1, color=colors[i % len(colors)])
+        plt.plot(path[:,0], path[:,1], label=result_labels[i], marker='.', markersize=1, linewidth=0.25, color=colors[i % len(colors)])
     plt.title(title)
     plt.xlabel('x'); plt.ylabel('y')
-    plt.show()
 
+    plt.legend(bbox_to_anchor=(0.5, -0.15), loc='upper center', ncol=2)
+    plt.tight_layout()
+
+    return plt
+
+def test_optimizer(optimizer_name: str, step_size: list[float], starting_point: list, **kwargs):
+    final_value =[]
+    number_of_iterations = []
+    starting_points = []
+
+    match optimizer_name:
+        case "adam":
+            from methods import adam as optimizer
+        case "gradient_descent":
+            from methods import gradient_descent as optimizer
+        case "adagrad":
+            from methods import adagrad as optimizer
+        case "newtons_method":
+            from methods import newtons_method as optimizer
+        case _:
+            raise ValueError(f"Unsupported optimizer: {optimizer_name}")
+
+    for s in step_size:
+        x_history, y_history = optimizer(x0=starting_point, step_size=s, **kwargs)
+        starting_points.append(starting_point)
+        final_value.append(y_history[-1])
+        number_of_iterations.append(len(x_history) - 1)  # -1 since x_history includes x0
+
+    return step_size, starting_points, final_value, number_of_iterations
