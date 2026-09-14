@@ -15,7 +15,7 @@ def plot_contours_with_path(
     xlim:   tuple[int, int] = None,
     ylim:   tuple[int, int] = None,
     levels: int = 40,
-    title:  str = ""
+    title:  str = "",
     ):
     
     # convert results to a list to allow any number of paths to be plotted
@@ -63,7 +63,8 @@ def plot_contours_with_path(
     gray_cmap = mcolors.LinearSegmentedColormap.from_list(
         "gray_no_white", ["lightgray", "black"]
     )
-
+    plt.xlim(xlim)
+    plt.ylim(ylim)
     cs = plt.contour(X, Y, Z, levels=levels, cmap=gray_cmap, linewidths=0.5)
     plt.clabel(cs, inline=1, fontsize=8)
 
